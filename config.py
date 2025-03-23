@@ -1,29 +1,17 @@
 # config.py
 
-data_path = "data"
-output_path = "result4"
 
-iteration = 200
-pattern_count = 7
-
+iteration = 400
 population_size = 250
-population_cap = 250
-penalty_multiplier = 1.1
-survive_chance = 0.75
-
-mutation_cap = 0.2
+pattern_count = 7
 mutation_rate = 0.2
-mutation_multiplier = 2
 
-target_size = (24, 24)
-pattern_shape = (3, 3)
+data_path = "data"
+output_path = f"{iteration}_{population_size}_{mutation_rate}"
 
-adaptation_cap = 0.25
 adaptation_rate = 0.05
-adaptation_multiplier = 1.2
-
 bred_rate = 0.5
-fresh_population_rate = 0.2
+fresh_population_rate = 0.1
 
 population_flag = False
 mutation_flag = False

@@ -5,91 +5,116 @@ import os
 import cv2
 import matplotlib.pyplot as plt
 
-def save_generation_results(len_population, best_fitness_history, avg_fitness_history, mutation_updates, adaptation_updates, best_reconstructed_images, best_individual, generation, output_dir="result"):
-    os.makedirs(output_dir, exist_ok=True)
-    
-    graph_path = os.path.join(output_dir, f"graph_{generation}_6.png")
-    plt.savefig(graph_path)
-    
+def save_generation_results(best_fitness_history, avg_fitness_history, best_reconstructed_images, best_individual, generation, output_dir="result"):
+    generation_dir = os.path.join(output_dir, f"generation_{generation}")
+    os.makedirs(generation_dir, exist_ok=True)
+  
     # Fitness grafiğini oluştur ve kaydet (Sadece axis[0,0])
     fig, ax = plt.subplots(figsize=(6, 4))
-    ax.plot(len_population, label='Space Fullness', color='black')
     ax.plot(avg_fitness_history, label='Avg Fitness', color='red')
     ax.plot(best_fitness_history, label='Best Fitness', color='blue')
-    ax.set_title(f"Generation {generation}")
-    
-    for gen in mutation_updates:
-        ax.axvline(x=gen, color='purple', linestyle='--', linewidth=1, label='Mutation Update' if gen == mutation_updates[0] else "")
-    
-    for gen in adaptation_updates:
-        ax.axvline(x=gen, color='green', linestyle='--', linewidth=1, label='Adaptation Update' if gen == adaptation_updates[0] else "")
-    
+    ax.set_title(f"Generation {generation} - {best_fitness_history[-1]:.3f}")
     ax.legend()
     
-    graph_path = os.path.join(output_dir, f"graph_{generation}.png")
+    graph_path = os.path.join(generation_dir, f"gen_{generation}_graph.png")
     plt.savefig(graph_path)
     plt.close(fig)
-    #print(f"Saved graph: {graph_path}")
     
-    if (generation + 1) % 50 == 0 or generation == 1:
-        generation_dir = os.path.join(output_dir, f"generation_{generation}")
-        os.makedirs(generation_dir, exist_ok=True)
+
+    # En iyi bireyin ürettiği resimleri kaydet
+    for idx, img in enumerate(best_reconstructed_images):
+        resized_img = cv2.resize(img, (960, 960), interpolation=cv2.INTER_NEAREST)
+        img_path = os.path.join(generation_dir, f"reconstructed_{idx}.png")
+        plt.imsave(img_path, resized_img, cmap='gray')
+        print(f"Saved reconstructed image: {img_path}")
     
-        graph_path = os.path.join(generation_dir, f"graph.png")
-        plt.savefig(graph_path)
-        plt.close(fig)
-        print(f"Saved graph: {graph_path}")
-        
-        # En iyi bireyin ürettiği resimleri kaydet
-        for idx, img in enumerate(best_reconstructed_images):
-            resized_img = cv2.resize(img, (960, 960), interpolation=cv2.INTER_NEAREST)
-            img_path = os.path.join(generation_dir, f"reconstructed_{idx}.png")
-            plt.imsave(img_path, resized_img, cmap='gray')
-            print(f"Saved reconstructed image: {img_path}")
-        
-        # En iyi bireyin patternlerini kaydet
-        for idx, pattern in enumerate(best_individual):
-            resized_pattern = cv2.resize(pattern, (120, 120), interpolation=cv2.INTER_NEAREST)
-            pattern_path = os.path.join(generation_dir, f"pattern_{idx}.png")
-            plt.imsave(pattern_path, resized_pattern, cmap='gray')
+    # En iyi bireyin patternlerini kaydet
+    for idx, pattern in enumerate(best_individual):
+        resized_pattern = cv2.resize(pattern, (120, 120), interpolation=cv2.INTER_NEAREST)
+        pattern_path = os.path.join(generation_dir, f"pattern_{idx}.png")
+        plt.imsave(pattern_path, resized_pattern, cmap='gray')
 
-            print(f"Saved pattern: {pattern_path}")
+        print(f"Saved pattern: {pattern_path}")
 
-def plot_everything(pltt, axes, ite, pop_curr, len_population, best_fitness_history, avg_fitness_history, generation, mutation_updates, adaptation_updates, best_reconstructed_images, mutation_rate):
+def plot_everything(pltt, axes, ite, pop_curr, best_fitness_history, avg_fitness_history, generation, best_reconstructed_images, mutation_rate, best_individual, iteration, output_dir="result"):
+    # 0,0 grafiğini büyütmek yerine doğrudan o bölgeyi daha büyük bir alan olarak yeniden çiz
     axes[0, 0].clear()
-    axes[0, 0].plot(len_population, label='Space Fullness', color='black')
     axes[0, 0].plot(avg_fitness_history, label='Avg Fitness', color='red')
     axes[0, 0].plot(best_fitness_history, label='Best Fitness', color='blue')
-    axes[0, 0].set_title(f"Generation {generation}")
-    
-    for gen in mutation_updates:
-        axes[0, 0].axvline(x=gen, color='purple', linestyle='--', linewidth=1, label='Mutation Update' if gen == mutation_updates[0] else "")
-    
-    for gen in adaptation_updates:
-        axes[0, 0].axvline(x=gen, color='green', linestyle='--', linewidth=1, label='Adaptation Update' if gen == adaptation_updates[0] else "")
-    
+    axes[0, 0].set_title(f"Generation {generation} - {best_fitness_history[-1]:.3f}")
     axes[0, 0].legend()
-        
-    max_images = axes.shape[1]
-    for i in range(1, 3):
-        axes[0, i].clear()
-        axes[0, i].imshow(best_reconstructed_images[i - 1], cmap='gray')
-        axes[0, i].axis('off')
 
-    for i in range(3):
-        axes[1, i].clear()
-        axes[1, i].imshow(best_reconstructed_images[2 + i], cmap='gray')
-        axes[1, i].axis('off')
-    
-    
-    axes[0, 1].set_title(f"Dynamic population and mutation")
-    axes[0, 2].set_title(f"Adaptation allowed")
-    
-    axes[1, 0].set_title(f"Generation: {ite}")
-    axes[1, 1].set_title(f"Population: {pop_curr}")
-    axes[1, 2].set_title(f"Mutation chance: {mutation_rate}")
-    
+    axes[0, 2].clear()
+    axes[0, 2].imshow(best_reconstructed_images[0], cmap='gray')
+    axes[0, 2].axis('off')
+
+    axes[1, 2].clear()
+    axes[1, 2].imshow(best_reconstructed_images[1], cmap='gray')
+    axes[1, 2].axis('off')
+
+    axes[2, 2].clear()
+    axes[2, 2].imshow(best_reconstructed_images[2], cmap='gray')
+    axes[2, 2].axis('off')
+
+    axes[2, 1].clear()
+    axes[2, 1].imshow(best_reconstructed_images[3], cmap='gray')
+    axes[2, 1].axis('off')
+
+    axes[2, 0].clear()
+    axes[2, 0].imshow(best_reconstructed_images[4], cmap='gray')
+    axes[2, 0].axis('off')
+
+    axes[0, 3].clear()
+    axes[0, 3].imshow(cv2.resize(best_individual[0], (120, 120), interpolation=cv2.INTER_NEAREST), cmap='gray')
+    axes[0, 3].axis('off')
+
+    axes[1, 3].clear()
+    axes[1, 3].imshow(cv2.resize(best_individual[1], (120, 120), interpolation=cv2.INTER_NEAREST), cmap='gray')
+    axes[1, 3].axis('off')
+
+    axes[2, 3].clear()
+    axes[2, 3].imshow(cv2.resize(best_individual[2], (120, 120), interpolation=cv2.INTER_NEAREST), cmap='gray')
+    axes[2, 3].axis('off')
+
+    axes[3, 3].clear()
+    axes[3, 3].imshow(cv2.resize(best_individual[3], (120, 120), interpolation=cv2.INTER_NEAREST), cmap='gray')
+    axes[3, 3].axis('off')
+
+    axes[3, 2].clear()
+    axes[3, 2].imshow(cv2.resize(best_individual[4], (120, 120), interpolation=cv2.INTER_NEAREST), cmap='gray')
+    axes[3, 2].axis('off')
+
+    axes[3, 1].clear()
+    axes[3, 1].imshow(cv2.resize(best_individual[5], (120, 120), interpolation=cv2.INTER_NEAREST), cmap='gray')
+    axes[3, 1].axis('off')
+
+    axes[3, 0].clear()
+    axes[3, 0].imshow(cv2.resize(best_individual[6], (120, 120), interpolation=cv2.INTER_NEAREST), cmap='gray')
+    axes[3, 0].axis('off')
+
+    axes[0, 1].axis('off')
+    axes[0, 1].text(0.5, 0.5, f"Iteration: {iteration}", 
+                   transform=axes[0, 1].transAxes,
+                   ha='center', va='center', fontsize=12,
+                   bbox=dict(facecolor='white', alpha=0.7))
+
+    axes[1, 0].axis('off')
+    axes[1, 0].text(0.5, 0.5, f"Population: {pop_curr}", 
+                   transform=axes[1, 0].transAxes,
+                   ha='center', va='center', fontsize=12,
+                   bbox=dict(facecolor='white', alpha=0.7))
+
+    axes[1, 1].axis('off')
+    axes[1, 1].text(0.5, 0.5, f"Mutation chance: {mutation_rate}", 
+                   transform=axes[1, 1].transAxes,
+                   ha='center', va='center', fontsize=12,
+                   bbox=dict(facecolor='white', alpha=0.7))
+
+
     pltt.pause(0.01)
+
+    graph_path = os.path.join(output_dir, f"gen_{generation}_plot.png")
+    pltt.savefig(graph_path)
 
 def reconstruct_images(individual, original_images):
     if not individual:
@@ -111,7 +136,6 @@ def reconstruct_images(individual, original_images):
     
     return reconstructed_images
 
-
 def crossover(parent1, parent2):
     crossover_point = random.randint(1, len(parent1) - 1)
     
@@ -132,7 +156,7 @@ def find_best_pattern_for_block(block, individual):
     
     return best_pattern
     
-def adapt(individual, images, pattern_shape):
+def adapt(individual, images):
     if not individual:
         return individual  # Eğer birey boşsa direkt döndür
 
@@ -153,7 +177,7 @@ def adapt(individual, images, pattern_shape):
     least_used_pattern = min(pattern_usage, key=pattern_usage.get) if pattern_usage else None
 
     if least_used_pattern is not None and pattern_usage[least_used_pattern] > 0:
-        new_pattern = generate_random_pattern(pattern_shape)
+        new_pattern = generate_random_pattern()
         
         for i in range(len(individual)):
             if np.array_equal(individual[i], np.array(least_used_pattern).reshape(3, 3)):
@@ -161,7 +185,7 @@ def adapt(individual, images, pattern_shape):
                 return individual
     else:
         random_index = random.randint(0, len(individual) - 1)
-        individual[random_index] = generate_random_pattern(pattern_shape)
+        individual[random_index] = generate_random_pattern()
 
     return individual
 
@@ -172,18 +196,15 @@ def sort_population(population):
 def natural_selection(population, population_cap):
     if not population:
         return []
+    population = sort_population(population)
     return population[:population_cap]
     
-def generate_new_generation(population, images, pattern_shape, pattern_count, adaptation_rate, adaptation_cap, mutation_rate, bred_count, fresh_population_count):
+def generate_new_generation(population, images, pattern_count, adaptation_rate, bred_count, fresh_population_count, mutation_rate = 0.1):
     new_generation = []
     
-    max_fitness = max(population, key=lambda x: x[1])[1]
     for individual, score in population:
-        adaptation_probability = (max_fitness - score) / max_fitness
-        final_adaptation_rate = min(adaptation_rate * adaptation_probability, adaptation_cap)
-        
-        if random.random() < final_adaptation_rate:
-            adapted_individual = adapt(individual, images, pattern_shape)
+        if random.random() < adaptation_rate:
+            adapted_individual = adapt(individual, images)
             adapted_score = fitness(adapted_individual, images)
             if adapted_score > score:
                 new_generation.append((adapted_individual, adapted_score))
@@ -239,11 +260,11 @@ def fitness(individual, images):
                 
     return total_count / total_pixels if total_pixels > 0 else 0  # Bölme hatasını önlemek için
 
-def generate_random_pattern(pattern_shape):
+def generate_random_pattern(pattern_shape=(3, 3)):
     return np.random.randint(2, size=pattern_shape)
 
-def generate_individual(pattern_count, pattern_shape=(3, 3)):
-    return [generate_random_pattern(pattern_shape) for _ in range(pattern_count)]
+def generate_individual(pattern_count):
+    return [generate_random_pattern() for _ in range(pattern_count)]
 
 def filter_images_by_size(images, target_size=(24, 24)):
     valid_images = []
