@@ -5,37 +5,6 @@ import os
 import cv2
 import matplotlib.pyplot as plt
 
-def save_generation_results(best_fitness_history, avg_fitness_history, best_reconstructed_images, best_individual, generation, output_dir="result"):
-    generation_dir = os.path.join(output_dir, f"generation_{generation}")
-    os.makedirs(generation_dir, exist_ok=True)
-  
-    # Fitness grafiğini oluştur ve kaydet (Sadece axis[0,0])
-    fig, ax = plt.subplots(figsize=(6, 4))
-    ax.plot(avg_fitness_history, label='Avg Fitness', color='red')
-    ax.plot(best_fitness_history, label='Best Fitness', color='blue')
-    ax.set_title(f"Generation {generation} - {best_fitness_history[-1]:.3f}")
-    ax.legend()
-    
-    graph_path = os.path.join(generation_dir, f"gen_{generation}_graph.png")
-    plt.savefig(graph_path)
-    plt.close(fig)
-    
-
-    # En iyi bireyin ürettiği resimleri kaydet
-    for idx, img in enumerate(best_reconstructed_images):
-        resized_img = cv2.resize(img, (960, 960), interpolation=cv2.INTER_NEAREST)
-        img_path = os.path.join(generation_dir, f"reconstructed_{idx}.png")
-        plt.imsave(img_path, resized_img, cmap='gray')
-        print(f"Saved reconstructed image: {img_path}")
-    
-    # En iyi bireyin patternlerini kaydet
-    for idx, pattern in enumerate(best_individual):
-        resized_pattern = cv2.resize(pattern, (120, 120), interpolation=cv2.INTER_NEAREST)
-        pattern_path = os.path.join(generation_dir, f"pattern_{idx}.png")
-        plt.imsave(pattern_path, resized_pattern, cmap='gray')
-
-        print(f"Saved pattern: {pattern_path}")
-
 def plot_everything(pltt, axes, ite, pop_curr, best_fitness_history, avg_fitness_history, generation, best_reconstructed_images, mutation_rate, best_individual, iteration, output_dir="result"):
     # 0,0 grafiğini büyütmek yerine doğrudan o bölgeyi daha büyük bir alan olarak yeniden çiz
     axes[0, 0].clear()
@@ -92,23 +61,23 @@ def plot_everything(pltt, axes, ite, pop_curr, best_fitness_history, avg_fitness
     axes[3, 0].imshow(cv2.resize(best_individual[6], (120, 120), interpolation=cv2.INTER_NEAREST), cmap='gray')
     axes[3, 0].axis('off')
 
-    axes[0, 1].axis('off')
-    axes[0, 1].text(0.5, 0.5, f"Iteration: {iteration}", 
+    axes[1, 0].axis('off')
+    axes[1, 0].text(0.5, 0.5, f"Best Loss: {1 - best_fitness_history[-1]:.3f} \n\nTotal Loss: {5 * (1 - avg_fitness_history[-1]):.3f}", 
                    transform=axes[0, 1].transAxes,
                    ha='center', va='center', fontsize=12,
                    bbox=dict(facecolor='white', alpha=0.7))
 
-    axes[1, 0].axis('off')
-    axes[1, 0].text(0.5, 0.5, f"Population: {pop_curr}", 
+    axes[0, 1].axis('off')
+    axes[0, 1].text(0.5, 0.5, f"Iteration: {iteration}\n\n Population: {pop_curr}\n\nMutation chance: {mutation_rate}", 
                    transform=axes[1, 0].transAxes,
                    ha='center', va='center', fontsize=12,
                    bbox=dict(facecolor='white', alpha=0.7))
 
     axes[1, 1].axis('off')
-    axes[1, 1].text(0.5, 0.5, f"Mutation chance: {mutation_rate}", 
-                   transform=axes[1, 1].transAxes,
-                   ha='center', va='center', fontsize=12,
-                   bbox=dict(facecolor='white', alpha=0.7))
+    # axes[1, 1].text(0.5, 0.5, f"", 
+                   # transform=axes[1, 1].transAxes,
+                   # ha='center', va='center', fontsize=12,
+                   # bbox=dict(facecolor='white', alpha=0.7))
 
 
     pltt.pause(0.01)

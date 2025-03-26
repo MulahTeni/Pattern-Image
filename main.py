@@ -44,11 +44,5 @@ if __name__ == "__main__":
         
         plot_everything(plt, axes, generation, config.population_size, best_fitness_history, avg_fitness_history, generation, reconstruct_images(population[0][0], images), config.mutation_rate, population[0][0], config.iteration, config.output_path)
         
-        # if generation % 50 == 0:
-            # save_generation_results(best_fitness_history, avg_fitness_history, reconstruct_images(population[0][0], images), population[0][0], generation, config.output_path)
-    
-    # best_ind = population[0]
-    # save_generation_results(best_fitness_history, avg_fitness_history, reconstruct_images(best_ind[0], images), best_ind[0], "Last Generation", config.output_path)
-
     plt.ioff()
     plt.close('all')

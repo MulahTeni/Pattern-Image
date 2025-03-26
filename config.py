@@ -1,13 +1,14 @@
 # config.py
 
 
-iteration = 400
-population_size = 250
+iteration = 200
+population_size = 200
 pattern_count = 7
-mutation_rate = 0.2
+mutation_rate = 0.4
 
-data_path = "data"
-output_path = f"{iteration}_{population_size}_{mutation_rate}"
+group = "group1" # group1, group2, group3
+data_path = f"data/{group}" 
+output_path = f"{population_size}_{mutation_rate}_{group}"
 
 adaptation_rate = 0.05
 bred_rate = 0.5
