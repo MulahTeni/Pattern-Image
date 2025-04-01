@@ -4,9 +4,9 @@
 iteration = 200
 population_size = 200
 pattern_count = 7
-mutation_rate = 0.4
+mutation_rate = 0.2
 
-group = "group1" # group1, group2, group3
+group = "group2" # group1, group2, group3
 data_path = f"data/{group}" 
 output_path = f"{population_size}_{mutation_rate}_{group}"
 
